@@ -31,3 +31,5 @@ typechain
 #Hardhat files
 cache
 artifacts
+src/frontend/contractsData/NFT-address.json
+src/frontend/contractsData/NFT.json
