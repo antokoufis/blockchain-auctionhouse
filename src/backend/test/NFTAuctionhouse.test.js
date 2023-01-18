@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const toWei = (num) => ethers.utils.parseEther(num.toString())
 
 describe("NFTAuctionhouse", function () {
     let deployer, addr1, addr2, nft, auctionhouse
@@ -74,4 +75,45 @@ describe("NFTAuctionhouse", function () {
             expect(await nft.ownerOf(1)).to.equal(addr1.address);
         });
     });
+
+    describe("Making auctions", function () {
+        beforeEach(async function () {
+          // addr1 mints an nft
+          await nft.connect(addr1).mint(URI)
+          // addr1 making an item
+          await auctionhouse.connect(addr1).makeItem(nft.address, 1)
+          // addr1 approves marketplace to spend nft
+          await nft.connect(addr1).setApprovalForAll(auctionhouse.address, true)
+        })
+    
+        it("Should track newly created auction and emit ListedAuctions event", async function () {
+    
+          await expect(auctionhouse.connect(addr1).makeAuction(1, toWei(0.12), 1704598623))
+            .to.emit(auctionhouse, "ListedAuctions")
+            .withArgs(
+              1,
+              1,
+              addr1.address,
+              toWei(0.12),
+              1704598623,
+              0,
+              1
+            )
+          // Owner of NFT should now be the marketplace
+          expect(await nft.ownerOf(1)).to.equal(auctionhouse.address);
+          expect(await auctionhouse.auctionCount()).to.equal(1)
+          // Get item from items mapping then check fields to ensure they are correct
+          const auction = await auctionhouse.auctions(1)
+          expect(auction.auctionId).to.equal(1)
+          expect(auction.itemId).to.equal(1)
+          expect(auction.auctioneer).to.equal(addr1.address)
+          expect(auction.startingPrice).to.equal(toWei(0.1212))
+          expect(auction.endDateTime).to.equal(1704598623)
+          expect(auction.winningBid).to.equal(0)
+          expect(auction.status).to.equal(1)
+    
+          const item = await auctionhouse.items(auction.itemId)
+          expect(item.status).to.equal(2)
+        });
+      });
 })
