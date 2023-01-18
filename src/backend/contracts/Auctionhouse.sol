@@ -69,6 +69,15 @@ contract Auctionhouse is ReentrancyGuard {
         uint256 status
     );
 
+    event ListedBid(
+        uint256 indexed bidId,
+        uint256 indexed auctionId,
+        uint256 bidPrice,
+        uint256 timestamp,
+        address payable bidder,
+        uint256 status
+    );
+
     constructor(uint256 _feePercent) {
         feeAccount = payable(msg.sender);
         feePercent = _feePercent;
@@ -121,6 +130,61 @@ contract Auctionhouse is ReentrancyGuard {
             1
         );
     }
+
+    function makeBid(uint256 _auctionId, uint256 _bidPrice)
+        external
+        payable
+        nonReentrant
+    {
+        Auction storage auction = auctions[_auctionId];
+        require(auction.auctioneer != msg.sender, "Auctioneer can NOT be bidder");
+        require(auction.endDateTime > block.timestamp, "End datetime must be greter than now");
+        require(auction.status == 1, "Auction must NOT be ended");
+
+        if (auction.winningBid == 0) {
+            require(auction.startingPrice < _bidPrice, "Price must be greater than starting price");
+            bidCount++;
+
+            bids[bidCount] = Bid(
+                bidCount,
+                _auctionId,
+                _bidPrice,
+                block.timestamp,
+                payable(msg.sender),
+                1
+            );
+            payable(address(this)).transfer(msg.value);
+            auction.winningBid = bidCount;
+        } else {
+            Bid storage bid = bids[auction.winningBid];
+            require(bid.bidPrice < _bidPrice, "Price must be greater than winning bid price");
+            bidCount++;
+
+            bids[bidCount] = Bid(
+                bidCount,
+                _auctionId,
+                _bidPrice,
+                block.timestamp,
+                payable(msg.sender),
+                1
+            );
+
+            bid.bidder.transfer(bid.bidPrice);
+            bid.status = 2;
+            payable(address(this)).transfer(msg.value);
+            auction.winningBid = bidCount;
+        }
+        emit ListedBid(
+            bidCount,
+            _auctionId,
+            _bidPrice,
+            block.timestamp,
+            payable(msg.sender),
+            1
+        );
+    }
+
+    receive() external payable {}
 
     function getTotalPrice(uint256 _price) public view returns (uint256) {
         return ((_price * (100 + feePercent)) / 100);
