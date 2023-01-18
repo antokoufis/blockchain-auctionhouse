@@ -1,0 +1,11 @@
+import React from 'react';
+
+function Auctions() {
+    return (
+        <div>
+        <h1>Auctions</h1>
+        </div>
+    );
+}
+
+export default Auctions;
