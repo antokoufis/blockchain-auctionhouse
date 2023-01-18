@@ -137,12 +137,21 @@ contract Auctionhouse is ReentrancyGuard {
         nonReentrant
     {
         Auction storage auction = auctions[_auctionId];
-        require(auction.auctioneer != msg.sender, "Auctioneer can NOT be bidder");
-        require(auction.endDateTime > block.timestamp, "End datetime must be greter than now");
+        require(
+            auction.auctioneer != msg.sender,
+            "Auctioneer can NOT be bidder"
+        );
+        require(
+            auction.endDateTime > block.timestamp,
+            "End datetime must be greter than now"
+        );
         require(auction.status == 1, "Auction must NOT be ended");
 
         if (auction.winningBid == 0) {
-            require(auction.startingPrice < _bidPrice, "Price must be greater than starting price");
+            require(
+                auction.startingPrice < _bidPrice,
+                "Price must be greater than starting price"
+            );
             bidCount++;
 
             bids[bidCount] = Bid(
@@ -157,7 +166,10 @@ contract Auctionhouse is ReentrancyGuard {
             auction.winningBid = bidCount;
         } else {
             Bid storage bid = bids[auction.winningBid];
-            require(bid.bidPrice < _bidPrice, "Price must be greater than winning bid price");
+            require(
+                bid.bidPrice < _bidPrice,
+                "Price must be greater than winning bid price"
+            );
             bidCount++;
 
             bids[bidCount] = Bid(
@@ -184,9 +196,37 @@ contract Auctionhouse is ReentrancyGuard {
         );
     }
 
+    function receiveItem(uint256 _auctionId) external payable nonReentrant {
+        Auction storage auction = auctions[_auctionId];
+        Item storage item = items[auction.itemId];
+        require(
+            auction.endDateTime < block.timestamp,
+            "The auction datetime must have passed"
+        );
+        if (auction.winningBid == 0) {
+            require(auction.auctioneer == msg.sender, "Auctioneer must be the sender");
+        } else {
+            Bid storage bid = bids[auction.winningBid];
+            require(bid.bidder == msg.sender, "Winner must be the sender");
+            item.owner.transfer(bid.bidPrice - getTotalFee(bid.bidPrice));
+            feeAccount.transfer(getTotalFee(bid.bidPrice));
+            item.owner = bid.bidder;
+        }
+
+        auction.status = 2;
+        item.status = 1;
+
+        IERC721 _nft = item.nft;
+        _nft.transferFrom(address(this), msg.sender, item.tokenId);
+    }
+
     receive() external payable {}
 
     function getTotalPrice(uint256 _price) public view returns (uint256) {
         return ((_price * (100 + feePercent)) / 100);
+    }
+
+    function getTotalFee(uint256 _price) public view returns (uint256) {
+        return ((_price * (feePercent)) / 100);
     }
 }
