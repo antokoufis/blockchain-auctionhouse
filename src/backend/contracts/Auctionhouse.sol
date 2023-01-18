@@ -13,6 +13,7 @@ contract Auctionhouse is ReentrancyGuard {
     // structs counters
     uint256 public itemCount;
     uint256 public auctionCount;
+    uint256 public bidCount;
 
     // Item struct
     struct Item {
@@ -34,10 +35,22 @@ contract Auctionhouse is ReentrancyGuard {
         uint256 status; //1 = Available for bidding, 2 = Not Available for bidding
     }
 
+    //Bid struct
+    struct Bid {
+        uint256 bidId;
+        uint256 auctionId;
+        uint256 bidPrice;
+        uint256 timestamp;
+        address payable bidder;
+        uint256 status; //1 = Active, 2 = Returned
+    }
+
     // itemId -> Item
     mapping(uint256 => Item) public items;
     // auctionId -> Auction
     mapping(uint256 => Auction) public auctions;
+    // bidId -> Bid
+    mapping(uint256 => Bid) public bids;
 
     event ListedItems(
         uint256 itemId,
