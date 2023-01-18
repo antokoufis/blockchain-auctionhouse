@@ -182,5 +182,30 @@ describe("NFTAuctionhouse", function () {
 
     });
 
+    describe("End of auction", function () {
+        beforeEach(async function () {
+            // addr1 mints an nft
+            await nft.connect(addr1).mint(URI)
+            // addr1 making an item
+            await auctionhouse.connect(addr1).makeItem(nft.address, 1)
+            // addr1 making an auction
+            // addr1 approves marketplace to spend nft
+            await nft.connect(addr1).setApprovalForAll(auctionhouse.address, true)
+            await auctionhouse.connect(addr1).makeAuction(1, toWei(0.12), 1704598623)
+            await auctionhouse.connect(addr2).makeBid(1, toWei(0.15), { value: toWei(0.15) })
+        });
 
+        it("Should transfer Function", async function () {
+            await auctionhouse.connect(addr2).receiveItem(1)
+
+            const auction = await auctionhouse.auctions(1)
+            const item = await auctionhouse.items(auction.itemId);
+
+            expect(addr1).to.equal(addr2.address)
+            expect(item.owner).to.equal(addr2.address)
+            expect(auction.status).to.equal(2)
+
+        });
+
+    });
 })
