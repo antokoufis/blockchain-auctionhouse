@@ -19,14 +19,34 @@ contract Auctionhouse is ReentrancyGuard {
         IERC721 nft;
         uint256 tokenId;
         address payable owner;
-        uint256 status; //1 = Available for Auction, 2 =  NOT available for Auction Item
+        uint256 status; //1 = Available for Auction, 2 =  NOT available for Auction
     }
 
     // itemId -> Item
-    mapping(uint => Item) public items;
+    mapping(uint256 => Item) public items;
+
+    event ListedItems(
+        uint256 itemId,
+        address indexed nft,
+        uint256 tokenId,
+        address indexed owner
+    );
 
     constructor(uint256 _feePercent) {
         feeAccount = payable(msg.sender);
         feePercent = _feePercent;
+    }
+
+    function makeItem(IERC721 _nft, uint256 _tokenId) external nonReentrant {
+        itemCount++;
+        items[itemCount] = Item(
+            itemCount,
+            _nft,
+            _tokenId,
+            payable(msg.sender),
+            1
+        );
+
+        emit ListedItems(itemCount, address(_nft), _tokenId, msg.sender);
     }
 }
