@@ -46,6 +46,16 @@ contract Auctionhouse is ReentrancyGuard {
         address indexed owner
     );
 
+    event ListedAuctions(
+        uint256 indexed auctionId,
+        uint256 indexed itemId,
+        address indexed auctioneer,
+        uint256 startingPrice,
+        uint256 endDateTime,
+        uint256 winningBid,
+        uint256 status
+    );
+
     constructor(uint256 _feePercent) {
         feeAccount = payable(msg.sender);
         feePercent = _feePercent;
@@ -62,5 +72,44 @@ contract Auctionhouse is ReentrancyGuard {
         );
 
         emit ListedItems(itemCount, address(_nft), _tokenId, msg.sender);
+    }
+
+    function makeAuction(
+        uint256 _itemId,
+        uint256 _startingPrice,
+        uint256 _endDateTime
+    ) external nonReentrant {
+        auctionCount++;
+        Item storage item = items[_itemId];
+        require(item.status == 1);
+        require(item.owner == msg.sender);
+        require(_startingPrice > 0);
+        auctions[auctionCount] = Auction(
+            auctionCount,
+            _itemId,
+            payable(msg.sender),
+            getTotalPrice(_startingPrice),
+            _endDateTime,
+            0,
+            1
+        );
+
+        item.status = 2;
+        IERC721 _nft = item.nft;
+        _nft.transferFrom(msg.sender, address(this), item.tokenId);
+
+        emit ListedAuctions(
+            auctionCount,
+            _itemId,
+            msg.sender,
+            _startingPrice,
+            _endDateTime,
+            0,
+            1
+        );
+    }
+
+    function getTotalPrice(uint256 _price) public view returns (uint256) {
+        return ((_price * (100 + feePercent)) / 100);
     }
 }
