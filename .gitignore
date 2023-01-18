@@ -33,3 +33,5 @@ cache
 artifacts
 src/frontend/contractsData/NFT-address.json
 src/frontend/contractsData/NFT.json
+src/frontend/contractsData/Auctionhouse-address.json
+src/frontend/contractsData/Auctionhouse.json
