@@ -46,4 +46,32 @@ describe("NFTAuctionhouse", function () {
             expect(await nft.ownerOf(2)).to.equal(addr2.address);
         });
     })
+
+    describe("Making items", function () {
+        beforeEach(async function () {
+            await nft.connect(addr1).mint(URI)
+        })
+
+        it("Should track newly created item and emit ListedItems event", async function () {
+
+            await expect(auctionhouse.connect(addr1).makeItem(nft.address, 1))
+                .to.emit(auctionhouse, "ListedItems")
+                .withArgs(
+                    1,
+                    nft.address,
+                    1,
+                    addr1.address,
+                )
+
+            expect(await auctionhouse.itemCount()).to.equal(1)
+            // Get item from items mapping then check fields to ensure they are correct
+            const item = await auctionhouse.items(1)
+            expect(item.itemId).to.equal(1)
+            expect(item.nft).to.equal(nft.address)
+            expect(item.tokenId).to.equal(1)
+            expect(item.owner).to.equal(addr1.address)
+            expect(item.status).to.equal(1)
+            expect(await nft.ownerOf(1)).to.equal(addr1.address);
+        });
+    });
 })
