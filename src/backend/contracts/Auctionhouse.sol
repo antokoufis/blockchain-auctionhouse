@@ -103,9 +103,13 @@ contract Auctionhouse is ReentrancyGuard {
     ) external nonReentrant {
         auctionCount++;
         Item storage item = items[_itemId];
-        require(item.status == 1);
-        require(item.owner == msg.sender);
-        require(_startingPrice > 0);
+        require(item.status == 1, "Item status must be 1, to be auctioned");
+        require(item.owner == msg.sender, "Auctioneer must be item owner");
+        require(_startingPrice > 0, "Auction price must be not 0");
+        require(
+            _endDateTime > block.timestamp,
+            "End datetime must be greater than now"
+        );
         auctions[auctionCount] = Auction(
             auctionCount,
             _itemId,
@@ -143,9 +147,9 @@ contract Auctionhouse is ReentrancyGuard {
         );
         require(
             auction.endDateTime > block.timestamp,
-            "End datetime must be greter than now"
+            "End datetime must be greater than now"
         );
-        require(auction.status == 1, "Auction must NOT be ended");
+        require(auction.status == 1, "Auction status must be 1, to be bidden");
 
         if (auction.winningBid == 0) {
             require(
@@ -204,7 +208,10 @@ contract Auctionhouse is ReentrancyGuard {
             "The auction datetime must have passed"
         );
         if (auction.winningBid == 0) {
-            require(auction.auctioneer == msg.sender, "Auctioneer must be the sender");
+            require(
+                auction.auctioneer == msg.sender,
+                "Auctioneer must be the sender"
+            );
         } else {
             Bid storage bid = bids[auction.winningBid];
             require(bid.bidder == msg.sender, "Winner must be the sender");
