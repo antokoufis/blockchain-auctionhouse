@@ -7,7 +7,7 @@
 **Setting up**
 
 1. Clone/Download the repository
-`git clone https://github.com/antokoufis/NFT-Auctionhouse.git`
+`git clone https://github.com/antokoufis/blockchain-auctionhouse`
 2. Get inside project
 `cd NFT-Auctionhouse` 
 3. Install project specific dependencies
@@ -46,3 +46,16 @@ networks. A form should pop up. For the "Network Name" field enter
     
     Note 2: Every time that you run `npx hardhat node` clear metamask history
     On Extension, click the account icon on the top-right corner. On Mobile, tap the hamburger icon in the top left to open the main menu > Select Settings > Select Advanced > Scroll down and click Reset Account
+    
+**Cheatsheet**
+1. Start Hardhad node
+`npx hardhat node`
+2. Run hardhat test
+`npx hardhat test`  
+3. Deploy smart contracts
+`npx hardhat run src/backend/scripts/deploy.js --network localhost`
+4. Start react
+`npm run start`
+5. Run hardhat console
+`npx hardhat console --network localhost`
+
