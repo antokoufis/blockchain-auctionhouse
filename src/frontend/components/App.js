@@ -15,6 +15,7 @@ import Auctions from './Auctions';
 import AuctionDetails from './AuctionDetails';
 import MyAuctions from './MyAuctions';
 import CreateAuctions from './CreateAuctions';
+import MyBids from './MyBids';
 
 import AuctionhouseAbi from '../contractsData/Auctionhouse.json'
 import AuctionhouseAddress from '../contractsData/Auctionhouse-address.json'
@@ -85,6 +86,9 @@ function App() {
                   } />
                   <Route path="/auctions/create-auctions" element={
                     <CreateAuctions auctionhouse={auctionhouse} nft={nft} />
+                  } />
+                  <Route path="/bids/my-bids" element={
+                    <MyBids auctionhouse={auctionhouse} nft={nft} />
                   } />
                 </Routes>
               </div>
