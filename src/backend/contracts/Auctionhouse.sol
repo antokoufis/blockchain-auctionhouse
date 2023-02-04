@@ -128,7 +128,7 @@ contract Auctionhouse is ReentrancyGuard {
             auctionCount,
             _itemId,
             msg.sender,
-            _startingPrice,
+            getTotalPrice(_startingPrice),
             _endDateTime,
             0,
             1
