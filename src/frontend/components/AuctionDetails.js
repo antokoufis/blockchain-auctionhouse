@@ -19,6 +19,7 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
     const [formVisible, setFormVisible] = useState(true)
     const [bid, setBid] = useState('')
     const [historyBids, setHistoryBids] = useState('')
+    const [posts, setPosts] = useState('')
 
     //Loads auction details from blockchain and set values on variables
     const loadAuctionhouseAuctionDetails = async () => {
@@ -87,12 +88,26 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
 
         }
 
+        var requestOptions = {
+            method: 'GET',
+            redirect: 'follow'
+        };
+
+        fetch("https://auctionhouse.antonisk.com/wp-json/wp/v2/addresses?_fields=content&slug=" + auction.auctioneer, requestOptions)
+            .then(response => response.json())
+            .then(result => setPosts(result))
+            .catch(error => console.log('error', error));
+
+
         //Set data on variables
         setHistoryBids(historyBids)
         setItemDetails(itemDetails)
         setAuctionDetails(auctionDetails)
         setLoading(false)
+
+
     }
+
 
     // Loader message
     useEffect(() => {
@@ -126,6 +141,8 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
             console.log("Item has no received: ", error)
         }
     }
+
+
 
     return (
         <div>
@@ -175,7 +192,7 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
                 )}
             </div>
 
-            {historyBids.length == 0 &&  auctionDetails.status.toNumber() == 1 && auctionDetails.loggingUser == auctionDetails.auctioneer.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
+            {historyBids.length == 0 && auctionDetails.status.toNumber() == 1 && auctionDetails.loggingUser == auctionDetails.auctioneer.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
                 <Button onClick={receiveItem} variant="primary" size="lg">
                     Close the auction
                 </Button>
@@ -205,10 +222,13 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
                                                 }
                                             </Card.Text>
                                             <Card.Text>
-                                                {historyBid.status.toNumber() == 2 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
+                                                {historyBid.status.toNumber() == 1 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
                                                     <Button onClick={receiveItem} variant="primary" size="lg">
                                                         Close the auction
                                                     </Button>
+                                                }
+                                                {historyBid.status.toNumber() == 1 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
+                                                    <p>{JSON.stringify(posts)} </p>
                                                 }
                                             </Card.Text>
                                         </Card.Body>

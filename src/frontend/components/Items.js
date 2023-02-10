@@ -42,7 +42,6 @@ const Items = ({ auctionhouse, nft, account }) => {
                     const auctionCount = await auctionhouse.auctionCount()
 
                     for (let y = 1; y <= auctionCount; y++) {
-                        alert(y);
                         //Get auction
                         const auction = await auctionhouse.auctions(y)
 
