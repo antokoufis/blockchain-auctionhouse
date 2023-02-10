@@ -36,7 +36,7 @@ const MyItems = ({ auctionhouse, nft, account }) => {
         const metadata = await response.json()
 
         // Check if items auctioning, and pass some extra fiels
-        if (item.status === 2) {
+        if (item.status == 2) {
 
           //Get auctions counter
           const auctionCount = await auctionhouse.auctionCount()
