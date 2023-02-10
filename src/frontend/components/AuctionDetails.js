@@ -19,7 +19,7 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
     const [formVisible, setFormVisible] = useState(true)
     const [bid, setBid] = useState('')
     const [historyBids, setHistoryBids] = useState('')
-    const [posts, setPosts] = useState('')
+    const [detailsOfAuctionner, setDetailsOfAuctionner] = useState('')
 
     //Loads auction details from blockchain and set values on variables
     const loadAuctionhouseAuctionDetails = async () => {
@@ -88,17 +88,6 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
 
         }
 
-        var requestOptions = {
-            method: 'GET',
-            redirect: 'follow'
-        };
-
-        fetch("https://auctionhouse.antonisk.com/wp-json/wp/v2/addresses?_fields=content&slug=" + auction.auctioneer, requestOptions)
-            .then(response => response.json())
-            .then(result => setPosts(result))
-            .catch(error => console.log('error', error));
-
-
         //Set data on variables
         setHistoryBids(historyBids)
         setItemDetails(itemDetails)
@@ -107,7 +96,6 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
 
 
     }
-
 
     // Loader message
     useEffect(() => {
@@ -144,6 +132,19 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
 
 
 
+    var requestOptions = {
+        method: 'GET',
+        redirect: 'follow'
+    };
+
+    fetch("https://auctionhouse.antonisk.com/wp-json/wp/v2/addresses?_fields=content&slug=0xa61b0629E7BC52BC6aE2F260fDd60724cf130a2d", requestOptions)
+        .then(response => response.text())
+        .then(result => setDetailsOfAuctionner(result))
+        .catch(error => console.log('error', error));
+
+
+
+
     return (
         <div>
             <h1>{itemDetails.name}</h1>
@@ -174,7 +175,7 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
                     <p style={{ background: "red", color: "white", borderRadius: 12, padding: 5 }}>Ended</p>
                 }
             </Card.Text>
-
+            <div>{detailsOfAuctionner}</div>
             <div>
                 {formVisible && auctionDetails.status.toNumber() == 1 && auctionDetails.loggingUser != auctionDetails.auctioneer.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 > Date.now() ? (
                     <Row className="g-4">
@@ -222,14 +223,12 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
                                                 }
                                             </Card.Text>
                                             <Card.Text>
-                                                {historyBid.status.toNumber() == 1 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
+                                                {historyBid.status.toNumber() == 2 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
                                                     <Button onClick={receiveItem} variant="primary" size="lg">
-                                                        Close the auction
+                                                        Receive item
                                                     </Button>
                                                 }
-                                                {historyBid.status.toNumber() == 1 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
-                                                    <p>{JSON.stringify(posts)} </p>
-                                                }
+
                                             </Card.Text>
                                         </Card.Body>
                                     </Card>
