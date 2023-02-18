@@ -137,10 +137,20 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
         redirect: 'follow'
     };
 
-    fetch("https://auctionhouse.antonisk.com/wp-json/wp/v2/addresses?_fields=content&slug=0xa61b0629E7BC52BC6aE2F260fDd60724cf130a2d", requestOptions)
-        .then(response => response.text())
-        .then(result => setDetailsOfAuctionner(result))
-        .catch(error => console.log('error', error));
+    fetch(
+        "https://auctionhouse.antonisk.com/wp-json/wp/v2/addresses?_fields=content&slug=" + auctionDetails.auctioneer
+    )
+        .then((res) => {
+            if (res.ok) {
+                return res.json();
+            }
+            throw new Error("Server error");
+        })
+        .then((res) => {
+            setDetailsOfAuctionner(res[0].content.rendered);
+        })
+        .catch((err) => console.log(err));
+
 
 
 
@@ -175,7 +185,6 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
                     <p style={{ background: "red", color: "white", borderRadius: 12, padding: 5 }}>Ended</p>
                 }
             </Card.Text>
-            <div>{detailsOfAuctionner}</div>
             <div>
                 {formVisible && auctionDetails.status.toNumber() == 1 && auctionDetails.loggingUser != auctionDetails.auctioneer.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 > Date.now() ? (
                     <Row className="g-4">
@@ -223,12 +232,16 @@ const AuctionDetails = ({ auctionhouse, nft }) => {
                                                 }
                                             </Card.Text>
                                             <Card.Text>
-                                                {historyBid.status.toNumber() == 2 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
+                                                {auctionDetails.status.toNumber() == 1 && historyBid.status.toNumber() == 1 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
                                                     <Button onClick={receiveItem} variant="primary" size="lg">
                                                         Receive item
                                                     </Button>
                                                 }
+                                                {auctionDetails.status.toNumber() == 1 &&  historyBid.status.toNumber() == 1 && auctionDetails.loggingUser == historyBid.bidder.toLowerCase() && auctionDetails.endDateTimeTimestamp * 1000 < Date.now() &&
 
+                                                    <div dangerouslySetInnerHTML={{ __html: detailsOfAuctionner }} />
+
+                                                }
                                             </Card.Text>
                                         </Card.Body>
                                     </Card>
